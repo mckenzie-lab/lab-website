@@ -75,8 +75,8 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 }
 .wordmark { display: flex; align-items: center; gap: 1.05rem; text-decoration: none; }
 .wordmark-mark {
-  width: 64px;
-  height: 64px;
+  width: 76px;
+  height: 76px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -93,10 +93,10 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   transform: scale(1.5);
 }
 .wordmark-text { display: flex; flex-direction: column; line-height: 1.2; }
-.wordmark-text strong { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; }
-.wordmark-text small { margin-top: 0.24rem; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.wordmark-text strong { font-family: var(--serif); font-size: 1.65rem; font-weight: 600; }
+.wordmark-text small { margin-top: 0.28rem; font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .site-nav { display: flex; align-items: center; gap: clamp(1.1rem, 2.5vw, 2.4rem); }
-.site-nav a { font-size: 0.86rem; font-weight: 650; letter-spacing: 0.04em; text-decoration: none; }
+.site-nav a { font-size: 0.98rem; font-weight: 650; letter-spacing: 0.04em; text-decoration: none; }
 .site-nav a:not(.nav-join) { border-bottom: 1px solid transparent; }
 .site-nav a:not(.nav-join):hover { border-color: currentColor; }
 .nav-join { padding: 0.6rem 1rem; color: white; background: var(--forest); border-radius: 999px; }
@@ -274,6 +274,9 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 980px) {
   .announcement { justify-content: space-between; }
   .site-header { min-height: 78px; }
+  .wordmark-mark { width: 64px; height: 64px; }
+  .wordmark-text strong { font-size: 1.4rem; }
+  .wordmark-text small { margin-top: 0.24rem; font-size: 0.68rem; }
   .menu-toggle { display: flex; align-items: center; gap: .75rem; cursor: pointer; }
   .menu-toggle-label { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .menu-toggle-lines { width: 24px; display: flex; flex-direction: column; gap: 6px; }
