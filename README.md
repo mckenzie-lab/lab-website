@@ -30,7 +30,3 @@ time the site is published.
 - Lab mark: `assets/images/monarda-brevis-cartoon-crop.svg`
 
 The site uses `patrick.mckenzie@oregonstate.edu` as its contact address.
-
-Large source photographs and superseded image alternatives are retained locally
-in `assets/images/` and ignored by Git. The deployment workflow publishes only
-the optimized and currently referenced web assets.
