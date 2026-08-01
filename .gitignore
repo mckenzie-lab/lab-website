@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+_site/
+
+# Local source photographs and superseded logo experiments. The site uses
+# optimized or final versions of these files instead.
+assets/images/monarda_reedii.jpg
+assets/images/monarda-didyma.jpg
+assets/images/monarda-brevis.jpg
+assets/images/monarda-logo-photo.jpg
+assets/images/monarda-brevis-cartoon.svg
+assets/images/patrick.jpg
