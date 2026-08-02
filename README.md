@@ -28,5 +28,6 @@ time the site is published.
 - First post: `blog/introducing-the-mckenzie-lab/index.html`
 - Photographs: `assets/images/`
 - Lab mark: `assets/images/monarda-brevis-cartoon-crop.svg`
+- Reusable horizontal logo: `brand/mckenzie-lab-logo.svg`
 
 The site uses `patrick.mckenzie@oregonstate.edu` as its contact address.
