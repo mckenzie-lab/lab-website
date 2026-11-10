@@ -34,11 +34,13 @@ The site uses `patrick.mckenzie@oregonstate.edu` as its contact address.
 
 ### People photos and bios
 
-The undergraduate and Friends of the lab cards are in `people/index.html`.
-To add a bio, insert `<p class="member-bio">Your text here.</p>` after the
-person's role; each undergraduate card includes a commented example.
+All member profiles are in `people/index.html` and use the same full-width layout,
+portrait treatment, and name styling. Section headings distinguish undergraduate
+students and honorary members. To add a bio, insert `<p>Your text here.</p>` after
+the person's name inside `profile-copy`; profiles without bios include a commented
+example.
 
 To replace a placeholder, add the portrait to `assets/images/`, update that
-card's image `src`, `alt`, `width`, and `height`, and add the new image path to
+person's image `src`, `alt`, `width`, and `height`, and add the new image path to
 the asset list in `.github/workflows/pages.yml` so GitHub Pages includes it.
-Portraits are displayed as square crops.
+Profile portraits fill the large photo panel.
