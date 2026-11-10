@@ -39,6 +39,7 @@ jobs:
             assets/images/monarda-field.jpg \
             assets/images/monarda-reedii-web.jpg \
             assets/images/patrick1.jpg \
+            assets/images/person-placeholder.svg \
             assets/images/pedicularis-pollen.jpg \
             _site/assets/images/
       - name: Upload Pages artifact

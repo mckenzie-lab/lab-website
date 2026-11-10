@@ -31,3 +31,14 @@ time the site is published.
 - Reusable horizontal logo: `brand/mckenzie-lab-logo.svg`
 
 The site uses `patrick.mckenzie@oregonstate.edu` as its contact address.
+
+### People photos and bios
+
+The undergraduate and Friends of the lab cards are in `people/index.html`.
+To add a bio, insert `<p class="member-bio">Your text here.</p>` after the
+person's role; each undergraduate card includes a commented example.
+
+To replace a placeholder, add the portrait to `assets/images/`, update that
+card's image `src`, `alt`, `width`, and `height`, and add the new image path to
+the asset list in `.github/workflows/pages.yml` so GitHub Pages includes it.
+Portraits are displayed as square crops.

@@ -219,6 +219,15 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 .profile-copy > p:not(.profile-role) { color: rgba(23,33,26,.72); }
 .profile-links { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1.3rem; }
 .profile-links a { font-size: .72rem; font-weight: 800; text-decoration: none; border-bottom: 1px solid currentColor; }
+.member-section { max-width: 1120px; margin: 4rem auto 0; }
+.member-section > h2 { margin: 0 0 1.5rem; font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 400; letter-spacing: -.03em; line-height: 1.2; }
+.member-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.member-card { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 1.5rem; align-items: start; padding: 1.5rem; background: var(--paper-bright); }
+.member-photo { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+.member-copy { align-self: center; min-width: 0; overflow-wrap: break-word; }
+.member-copy h3 { margin: 0 0 .5rem; font-family: var(--serif); font-size: 1.7rem; font-weight: 400; letter-spacing: -.03em; line-height: 1.15; }
+.member-role { margin: 0; color: var(--forest); font-size: .82rem; line-height: 1.5; }
+.member-bio { margin: 1rem 0 0; color: rgba(23,33,26,.72); font-size: .9rem; }
 .future-team { max-width: 1120px; margin: 4rem auto 0; }
 .future-team-label { font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .future-team-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--line); }
@@ -370,6 +379,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   .research-card { min-height: 500px; }
   .profile { grid-template-columns: .8fr 1.2fr; }
   .profile-photo { min-height: 540px; }
+  .member-card { grid-template-columns: 88px minmax(0, 1fr); gap: 1rem; padding: 1.25rem; }
   .notes-copy { padding-right: 0; }
   .interior-hero, .research-topic, .collection-inner, .herbarium-note { grid-template-columns: 1fr; }
   .topic-heading { position: static; }
@@ -389,6 +399,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   .approach-visual img { min-height: 480px; }
   .profile { grid-template-columns: 1fr; }
   .profile-photo { min-height: 520px; max-height: 670px; }
+  .member-grid { grid-template-columns: 1fr; }
   .future-team-grid { grid-template-columns: 1fr; }
   .future-team-grid > div { padding: 1.8rem 0; border-bottom: 1px solid var(--line); }
   .future-team-grid > div + div { padding-left: 0; border-left: 0; }
