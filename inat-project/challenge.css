@@ -69,7 +69,7 @@
 /* Compact layout. Only applies while <html> in index.html has class="bc-compact";
    remove that class to switch all of this off (challenge.js also shows longer lists again). */
 html.bc-compact .bc-hero { padding-top: clamp(2rem, 3.5vw, 3.2rem); padding-bottom: clamp(2rem, 3.5vw, 3.2rem); }
-html.bc-compact .bc-hero h1 { max-width: 22em; font-size: clamp(1.9rem, 3.2vw, 3.1rem); line-height: 1.05; }
+html.bc-compact .bc-hero h1 { max-width: none; font-size: clamp(1.9rem, 3.2vw, 3.1rem); line-height: 1.05; text-wrap: balance; }
 html.bc-compact .bc-lede { max-width: 760px; margin-top: 1rem; font-size: 1rem; }
 html.bc-compact .bc-stats { margin-top: clamp(1.4rem, 2.5vw, 2.2rem); }
 html.bc-compact .bc-stats > div { padding-top: 1rem; }
