@@ -7,7 +7,7 @@
   // vascular plants (taxon 211194) in Benton County, OR (place 484).
   const COUNTY_QUERY = { place_id: 484, taxon_id: 211194, quality_grade: 'research' };
 
-  const REFRESH_MS = 30 * 60 * 1000; // refresh project data every 30 minutes
+  const REFRESH_MS = 30 * 60 * 1000; // if the page is left open, refresh project data every 30 minutes
   const RETRY_MS = 5 * 60 * 1000; // try again sooner after a failed refresh
   const REQUEST_GAP_MS = 1100; // iNaturalist asks for about one request per second
   const COUNTY_CACHE_MS = 24 * 60 * 60 * 1000; // the county list changes slowly
@@ -244,7 +244,7 @@
     const time = (date) => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     let text;
     if (!failed) {
-      text = `Updated ${time(lastSuccess)}. Refreshes every 30 minutes.`;
+      text = `Last updated ${time(lastSuccess)}.`;
     } else if (lastSuccess) {
       text = `can’t reach iNaturalist right now, so this is the data from ${time(lastSuccess)}. will keep trying.`;
     } else {
@@ -301,7 +301,7 @@
       $('bc-wanted-now-title').textContent = `Most wanted: findable in ${monthName}`;
       const { missing, total } = renderWanted('bc-wanted-now', 'bc-wanted-now-note', county, projectTaxa,
         (n) => `county ${n === 1 ? 'observation' : 'observations'} in ${monthName}`);
-      $('bc-wanted-now-note').textContent = `${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year) are still missing from the project. These are the most frequent ${monthName} species on iNat that we haven't recorded yet:`;
+      $('bc-wanted-now-note').textContent = `We're still missing ${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year).`;
     }, () => showUnavailable('bc-wanted-now'));
 
     await step(async () => {
@@ -309,7 +309,7 @@
       const county = await countySpecies(null);
       const { missing, total } = renderWanted('bc-wanted-all', 'bc-wanted-all-note', county, projectTaxa,
         (n) => `county ${n === 1 ? 'observation' : 'observations'}`);
-      $('bc-wanted-all-note').textContent = `We're still missing ${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species. Below are the county’s most frequent species on iNat that we haven't seen yet:`;
+      $('bc-wanted-all-note').textContent = `We're still missing ${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species.`;
     }, () => showUnavailable('bc-wanted-all'));
 
     if (!failed) lastSuccess = new Date();
