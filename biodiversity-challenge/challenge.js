@@ -1,6 +1,5 @@
 // Live results for the lab's iNaturalist project, fetched in the browser from the
-// public iNaturalist API. No key, no build step. Add ?display=1 to the page address
-// for the full-screen hallway display.
+// public iNaturalist API. No key, no build step.
 (() => {
   const API = 'https://api.inaturalist.org/v1';
   const PROJECT_ID = 310448;
@@ -12,13 +11,11 @@
   const RETRY_MS = 5 * 60 * 1000; // try again sooner after a failed refresh
   const REQUEST_GAP_MS = 1100; // iNaturalist asks for about one request per second
   const COUNTY_CACHE_MS = 24 * 60 * 60 * 1000; // the county list changes slowly
-  const SLIDE_MS = 20 * 1000; // hallway display: time per panel
   const TOP_SPECIES = 8;
   const RECENT = 12;
   const LEADERS = 10;
   const WANTED = 25;
 
-  const kiosk = document.documentElement.classList.contains('kiosk');
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n).toLocaleString('en-US');
 
@@ -209,7 +206,7 @@
   // any species, but matching county species are flagged so they are easy to spot.
   function renderWanted(id, noteId, county, projectTaxa, describe) {
     const recorded = new Set(projectTaxa.map(({ taxon }) => taxon.id));
-    const coarse = new Set(projectTaxa.filter(({ taxon }) => taxon.rank_level > 10).map(({ taxon }) => taxon.id));
+    const coarse = new Map(projectTaxa.filter(({ taxon }) => taxon.rank_level > 10).map(({ taxon }) => [taxon.id, taxon]));
     const missing = county.filter((species) => !recorded.has(species.id));
 
     fill($(id), missing.slice(0, WANTED).map((species, index) => {
@@ -217,15 +214,14 @@
       const copy = el('div');
       const name = capitalize(species.common) || species.name;
       copy.append(el('p', 'bc-name', name), el('p', 'bc-sci', species.name));
-      // Each label has a long form for the page and a short form for the hallway display.
-      const [long, short] = describe(species.count);
       const meta = el('p', 'bc-meta');
-      meta.append(el('strong', '', fmt(species.count)), ' ', el('span', 'bc-long', long), el('span', 'bc-short', short));
+      meta.append(el('strong', '', fmt(species.count)), ` ${describe(species.count)}`);
       copy.append(meta);
-      if (species.ancestors.some((ancestor) => coarse.has(ancestor))) {
-        const hint = el('p', 'bc-hint');
-        hint.append(el('span', 'bc-long', 'Logged, but not yet identified to species'), el('span', 'bc-short', 'Needs species ID'));
-        copy.append(hint);
+      // Closest coarse project entry (usually the genus) that this species falls under.
+      // It is only a maybe: that observation could be a different species in the group.
+      const group = coarse.get([...species.ancestors].reverse().find((ancestor) => coarse.has(ancestor)));
+      if (group) {
+        copy.append(el('p', 'bc-hint', `We might already have this one! We've logged a ${group.name} that's only ID'd to ${group.rank} so far`));
       }
       const inner = document.createDocumentFragment();
       inner.append(el('span', 'bc-rank', String(index + 1)), photo(species.photo, name, species.credit), copy);
@@ -252,9 +248,6 @@
     }
     $('bc-updated').textContent = text;
     $('bc-updated').classList.toggle('is-error', failed);
-    const bar = $('bc-kiosk-updated');
-    bar.textContent = failed ? (lastSuccess ? `iNaturalist unreachable · data from ${time(lastSuccess)}` : 'iNaturalist unreachable · retrying') : `Updated ${time(lastSuccess)}`;
-    bar.classList.toggle('is-error', failed);
   }
 
   async function refresh() {
@@ -303,7 +296,7 @@
       const county = await countySpecies(now.getMonth() + 1);
       $('bc-wanted-now-title').textContent = `Most wanted: findable in ${monthName}`;
       const { missing, total } = renderWanted('bc-wanted-now', 'bc-wanted-now-note', county, projectTaxa,
-        (n) => [`county ${n === 1 ? 'observation' : 'observations'} in ${monthName}`, `in ${monthName}`]);
+        (n) => `county ${n === 1 ? 'observation' : 'observations'} in ${monthName}`);
       $('bc-wanted-now-note').textContent = `${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year) are still missing from the project. These are seen most often.`;
     }, () => showUnavailable('bc-wanted-now'));
 
@@ -311,7 +304,7 @@
       if (!projectTaxa) throw new Error('Project species list unavailable');
       const county = await countySpecies(null);
       const { missing, total } = renderWanted('bc-wanted-all', 'bc-wanted-all-note', county, projectTaxa,
-        (n) => [`county ${n === 1 ? 'observation' : 'observations'}`, 'in county']);
+        (n) => `county ${n === 1 ? 'observation' : 'observations'}`);
       $('bc-wanted-all-note').textContent = `${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species are still missing from the project. These are the county’s most commonly observed.`;
     }, () => showUnavailable('bc-wanted-all'));
 
@@ -320,27 +313,5 @@
     setTimeout(refresh, failed ? RETRY_MS : REFRESH_MS);
   }
 
-  // ---------- hallway display: rotate through the panels ----------
-
-  function startSlides() {
-    const panels = [...document.querySelectorAll('.bc-panel')];
-    const dots = panels.map(() => $('bc-dots').appendChild(el('i')));
-    let current = 0;
-    const show = (index) => {
-      current = index;
-      panels.forEach((panel, i) => panel.classList.toggle('is-active', i === index));
-      dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
-    };
-    // &slide=N starts on panel N (1-based), handy for checking a single panel.
-    const start = Number(new URLSearchParams(location.search).get('slide')) || 1;
-    show(Math.min(Math.max(start, 1), panels.length) - 1);
-    setInterval(() => show((current + 1) % panels.length), SLIDE_MS);
-    // Escape (or a click) leaves display mode.
-    const leave = () => { location.href = location.pathname; };
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') leave(); });
-    document.addEventListener('click', leave);
-  }
-
-  if (kiosk) startSlides();
   refresh();
 })();
