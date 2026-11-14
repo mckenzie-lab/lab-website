@@ -29,18 +29,25 @@ jobs:
         run: |
           mkdir -p _site/assets/images
           cp index.html styles.css script.js 404.html .nojekyll _site/
-          cp -R blog people _site/
+          cp -R blog people inat-project research herbarium _site/
           cp \
+            assets/images/_macro_integrifolia_crop.jpg \
             assets/images/katie_uckele.jpg \
             assets/images/monarda-brevis-cartoon-crop.svg \
             assets/images/monarda-brevis-cartoon-favicon.svg \
+            assets/images/monarda-color-map.jpg \
             assets/images/monarda-didyma-web.jpg \
             assets/images/monarda-eplingiana.jpg \
             assets/images/monarda-field.jpg \
+            assets/images/monarda-pringlei-web.jpg \
             assets/images/monarda-reedii-web.jpg \
+            assets/images/ms-smc-concept.jpg \
+            assets/images/patrick-in-jmu-herbarium.jpg \
             assets/images/patrick1.jpg \
             assets/images/person-placeholder.svg \
             assets/images/pedicularis-pollen.jpg \
+            assets/images/research-monarda-brevis.jpg \
+            assets/images/specimens.jpg \
             _site/assets/images/
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
