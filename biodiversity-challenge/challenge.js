@@ -298,7 +298,7 @@
     await step(async () => {
       if (!projectTaxa) throw new Error('Project species list unavailable');
       const county = await countySpecies(now.getMonth() + 1);
-      $('bc-wanted-now-title').textContent = `Most wanted: findable in ${monthName}`;
+      $('bc-wanted-now-title').textContent = `${monthName}'s most wanted:`;
       const { missing, total } = renderWanted('bc-wanted-now', 'bc-wanted-now-note', county, projectTaxa,
         (n) => `county ${n === 1 ? 'observation' : 'observations'} in ${monthName}`);
       $('bc-wanted-now-note').textContent = `We're still missing ${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year).`;
