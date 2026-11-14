@@ -11,10 +11,13 @@
   const RETRY_MS = 5 * 60 * 1000; // try again sooner after a failed refresh
   const REQUEST_GAP_MS = 1100; // iNaturalist asks for about one request per second
   const COUNTY_CACHE_MS = 24 * 60 * 60 * 1000; // the county list changes slowly
-  const TOP_SPECIES = 8;
-  const RECENT = 12;
-  const LEADERS = 10;
-  const WANTED = 25;
+  // The compact layout (class="bc-compact" on <html> in index.html) shows shorter
+  // lists. Remove that class to get the original sizes and list lengths back.
+  const compact = document.documentElement.classList.contains('bc-compact');
+  const TOP_SPECIES = compact ? 6 : 8;
+  const RECENT = compact ? 6 : 12;
+  const LEADERS = compact ? 5 : 10;
+  const WANTED = compact ? 12 : 25;
 
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n).toLocaleString('en-US');

@@ -65,3 +65,50 @@
   .bc-board li:not(.bc-status) { grid-template-columns: 1.3rem 2.4rem minmax(0, 1fr) auto; gap: .7rem; }
   .bc-avatar { width: 2.4rem; height: 2.4rem; }
 }
+
+/* Compact layout. Only applies while <html> in index.html has class="bc-compact";
+   remove that class to switch all of this off (challenge.js also shows longer lists again). */
+html.bc-compact .bc-hero { padding-top: clamp(2rem, 3.5vw, 3.2rem); padding-bottom: clamp(2rem, 3.5vw, 3.2rem); }
+html.bc-compact .bc-hero h1 { max-width: 22em; font-size: clamp(1.9rem, 3.2vw, 3.1rem); line-height: 1.05; }
+html.bc-compact .bc-lede { max-width: 760px; margin-top: 1rem; font-size: 1rem; }
+html.bc-compact .bc-stats { margin-top: clamp(1.4rem, 2.5vw, 2.2rem); }
+html.bc-compact .bc-stats > div { padding-top: 1rem; }
+html.bc-compact .bc-stats dd { font-size: clamp(2.4rem, 5vw, 4.6rem); }
+html.bc-compact .bc-stats dt { margin-top: .4rem; }
+html.bc-compact .bc-actions { margin-top: 1.5rem; }
+html.bc-compact .bc-updated { margin-top: 1rem; }
+
+html.bc-compact .bc-section { padding-top: clamp(2rem, 3.2vw, 3rem); padding-bottom: clamp(2rem, 3.2vw, 3rem); }
+html.bc-compact .bc-heading { margin-bottom: clamp(1rem, 1.6vw, 1.4rem); }
+html.bc-compact .bc-heading h2 { font-size: clamp(1.6rem, 2.4vw, 2.3rem); }
+html.bc-compact .bc-heading p { max-width: 560px; margin-bottom: 0; font-size: .9rem; }
+html.bc-compact .bc-credit { margin-top: 1.5rem; }
+
+html.bc-compact .bc-cards { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(.8rem, 1.4vw, 1.2rem); }
+html.bc-compact .bc-card-copy { padding-top: .55rem; grid-template-columns: 1fr; }
+html.bc-compact .bc-cards-recent .bc-card > a > div { padding-top: .55rem !important; }
+html.bc-compact .bc-name { font-size: 1.05rem; }
+html.bc-compact .bc-sci { margin-top: .15rem; font-size: .8rem; }
+html.bc-compact .bc-meta { margin-top: .15rem; font-size: .76rem; }
+html.bc-compact .bc-count { grid-row: auto; margin-top: .3rem; font-size: 1.35rem; text-align: left; }
+html.bc-compact .bc-count small { display: inline; margin-left: .3rem; }
+
+html.bc-compact .bc-leaders { gap: clamp(1.5rem, 4vw, 4rem); }
+html.bc-compact .bc-leaders h3 { margin-bottom: .5rem; }
+html.bc-compact .bc-board li:not(.bc-status) { padding: .5rem 0; grid-template-columns: 1.3rem 2.2rem minmax(0, 1fr) auto; gap: .8rem; }
+html.bc-compact .bc-avatar { width: 2.2rem; height: 2.2rem; font-size: 1rem; }
+html.bc-compact .bc-board .bc-name small { display: inline; margin: 0 0 0 .5rem; }
+html.bc-compact .bc-score { font-size: 1.6rem; }
+
+html.bc-compact .bc-wanted { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.5rem), 1fr)); gap: 0 clamp(1rem, 2vw, 2rem); }
+html.bc-compact .bc-wanted li:not(.bc-status) { padding: .5rem 0; grid-template-columns: 1.4rem 3.2rem minmax(0, 1fr); gap: .7rem; }
+html.bc-compact .bc-wanted .bc-photo { width: 3.2rem; height: 3.2rem; }
+html.bc-compact .bc-wanted .bc-name { font-size: 1rem; }
+html.bc-compact .bc-hint { margin-top: .2rem; font-size: .72rem; }
+
+@media (max-width: 980px) {
+  html.bc-compact .bc-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  html.bc-compact .bc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
