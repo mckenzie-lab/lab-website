@@ -46,7 +46,7 @@
     const list = $(id);
     // Keep whatever is already on screen if an earlier load succeeded.
     if (list.querySelector(':scope > :not(.bc-status)')) return;
-    fill(list, [], 'Not available right now. We will try again shortly.');
+    fill(list, [], 'Not available right now. will try again shortly.');
   }
 
   const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
@@ -246,9 +246,9 @@
     if (!failed) {
       text = `Updated ${time(lastSuccess)}. Refreshes every 30 minutes.`;
     } else if (lastSuccess) {
-      text = `We can’t reach iNaturalist right now, so this is the data from ${time(lastSuccess)}. We’ll keep trying.`;
+      text = `can’t reach iNaturalist right now, so this is the data from ${time(lastSuccess)}. will keep trying.`;
     } else {
-      text = 'We can’t reach iNaturalist right now. This page will keep trying, or you can visit the project on iNaturalist directly.';
+      text = 'can’t reach iNaturalist right now. This page will keep trying, or you can visit the project on iNaturalist directly.';
     }
     $('bc-updated').textContent = text;
     $('bc-updated').classList.toggle('is-error', failed);
@@ -301,7 +301,7 @@
       $('bc-wanted-now-title').textContent = `Most wanted: findable in ${monthName}`;
       const { missing, total } = renderWanted('bc-wanted-now', 'bc-wanted-now-note', county, projectTaxa,
         (n) => `county ${n === 1 ? 'observation' : 'observations'} in ${monthName}`);
-      $('bc-wanted-now-note').textContent = `${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year) are still missing from the project. These are seen most often.`;
+      $('bc-wanted-now-note').textContent = `${fmt(missing)} of the ${fmt(total)} plant species seen in Benton County in ${monthName} (any year) are still missing from the project. These are the most frequent ${monthName} species on iNat that we haven't recorded yet:`;
     }, () => showUnavailable('bc-wanted-now'));
 
     await step(async () => {
@@ -309,7 +309,7 @@
       const county = await countySpecies(null);
       const { missing, total } = renderWanted('bc-wanted-all', 'bc-wanted-all-note', county, projectTaxa,
         (n) => `county ${n === 1 ? 'observation' : 'observations'}`);
-      $('bc-wanted-all-note').textContent = `${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species are still missing from the project. These are the county’s most commonly observed.`;
+      $('bc-wanted-all-note').textContent = `We're still missing ${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species. Below are the county’s most frequent species on iNat that we haven't seen yet:`;
     }, () => showUnavailable('bc-wanted-all'));
 
     if (!failed) lastSuccess = new Date();
