@@ -203,10 +203,14 @@
   // most-observed-first order. Comparison is by species: the API already rolls
   // subspecies and varieties up to their species in both lists. Project entries
   // identified only to genus (or another coarse rank) do not count as recording
-  // any species, but matching county species are flagged so they are easy to spot.
+  // any species, but county species in the same genus (or narrower group) are
+  // flagged so they are easy to spot.
   function renderWanted(id, noteId, county, projectTaxa, describe) {
     const recorded = new Set(projectTaxa.map(({ taxon }) => taxon.id));
-    const coarse = new Map(projectTaxa.filter(({ taxon }) => taxon.rank_level > 10).map(({ taxon }) => [taxon.id, taxon]));
+    // Only genus (rank level 20) and narrower count as a hint; a tribe or family is too broad.
+    const coarse = new Map(projectTaxa
+      .filter(({ taxon }) => taxon.rank_level > 10 && taxon.rank_level <= 20)
+      .map(({ taxon }) => [taxon.id, taxon]));
     const missing = county.filter((species) => !recorded.has(species.id));
 
     fill($(id), missing.slice(0, WANTED).map((species, index) => {
