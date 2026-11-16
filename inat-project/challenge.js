@@ -19,6 +19,18 @@
   const LEADERS = compact ? 5 : 10;
   const WANTED = compact ? 12 : 25;
 
+  // County firsts. The project only counts observations made from this date on
+  // (its own start-date rule on iNaturalist), so anything seen in the county
+  // before it was seen by someone else first.
+  const PROJECT_START = '2026-08-01';
+  // Any verifiable record (research grade or still needing ID) counts as an
+  // earlier county record, so a "first" really has nothing before it.
+  const COUNTY_ANY_QUERY = { place_id: 484, taxon_id: 211194, verifiable: true };
+  const FIRSTS_LOOKUPS = 30; // most species checked one by one per page load
+  // Saved copy of OregonFlora's Benton County checklist; refresh it with
+  // scripts/update_oregonflora_checklist.py.
+  const OREGONFLORA_LIST = 'oregonflora-benton.json?v=1';
+
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n).toLocaleString('en-US');
 
@@ -130,6 +142,87 @@
     return species;
   }
 
+  // Ids of every species with a verifiable county observation made before the
+  // project started. Cached like the county list above.
+  async function countyBeforeProject() {
+    const key = 'bc-county-before-v1';
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(key));
+      if (cached && Date.now() - cached.savedAt < COUNTY_CACHE_MS) return new Set(cached.ids);
+    } catch (error) { /* storage unavailable or unreadable: fetch instead */ }
+
+    const [y, m, d] = PROJECT_START.split('-').map(Number);
+    const dayBefore = new Date(Date.UTC(y, m - 1, d - 1)).toISOString().slice(0, 10);
+    const { results } = await allPages('/observations/species_counts', { ...COUNTY_ANY_QUERY, d2: dayBefore });
+    const ids = results.map(({ taxon }) => taxon.id);
+    try {
+      sessionStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), ids }));
+    } catch (error) { /* storage full or unavailable: carry on without the cache */ }
+    return new Set(ids);
+  }
+
+  // Project observations that are the earliest record of their species in the
+  // county on iNaturalist, newest first.
+  const earliestInCounty = new Map(); // taxon id -> earliest county observation (kept while the page is open)
+  async function countyFirsts(projectTaxa) {
+    const before = await countyBeforeProject();
+    const candidates = projectTaxa
+      .filter(({ taxon }) => taxon.rank_level <= 10 && !before.has(taxon.id))
+      .slice(0, FIRSTS_LOOKUPS);
+    // Nobody saw these before the project started, but a non-member could still
+    // have beaten us to one since. Look up each one's earliest county record...
+    for (const { taxon } of candidates) {
+      if (earliestInCounty.has(taxon.id)) continue;
+      const data = await api('/observations', {
+        ...COUNTY_ANY_QUERY, taxon_id: taxon.id, order_by: 'observed_on', order: 'asc', per_page: 1,
+      });
+      if (data.results[0]) earliestInCounty.set(taxon.id, data.results[0]);
+    }
+    const earliest = candidates.map(({ taxon }) => earliestInCounty.get(taxon.id)).filter(Boolean);
+    if (!earliest.length) return [];
+    // ...and keep the ones where that record is one of ours.
+    const ours = await api('/observations', {
+      project_id: PROJECT_ID, id: earliest.map((observation) => observation.id).join(','), per_page: 200,
+    });
+    const inProject = new Set(ours.results.map((observation) => observation.id));
+    return earliest
+      .filter((observation) => inProject.has(observation.id))
+      .sort((a, b) => (b.observed_on || '').localeCompare(a.observed_on || ''));
+  }
+
+  // "Genus species" in lower case, without hybrid signs or anything below species,
+  // so names from iNaturalist and OregonFlora can be compared.
+  const binomial = (name) => name.toLowerCase().replace(/×/g, ' x ').split(/\s+/)
+    .filter((word) => word && word !== 'x').slice(0, 2).join(' ');
+
+  let oregonFlora = null; // set of binomials on the saved checklist
+  async function oregonFloraNames() {
+    if (!oregonFlora) {
+      const response = await fetch(OREGONFLORA_LIST);
+      if (!response.ok) throw new Error(`OregonFlora checklist returned ${response.status}`);
+      oregonFlora = new Set((await response.json()).names.map(binomial));
+    }
+    return oregonFlora;
+  }
+
+  // Project species that are not on the OregonFlora checklist, under the name
+  // iNaturalist uses or any other scientific name iNaturalist knows them by
+  // (OregonFlora often files the same plant under a different name).
+  const listedBySynonym = new Map(); // taxon id -> true/false (kept while the page is open)
+  async function notOnOregonFlora(projectTaxa) {
+    const listed = await oregonFloraNames();
+    const unmatched = projectTaxa.filter(({ taxon }) => taxon.rank_level <= 10 && !listed.has(binomial(taxon.name)));
+    const unknown = unmatched.map(({ taxon }) => taxon.id).filter((id) => !listedBySynonym.has(id));
+    for (let i = 0; i < unknown.length; i += 30) {
+      const data = await api(`/taxa/${unknown.slice(i, i + 30).join(',')}`, { all_names: true });
+      data.results.forEach((taxon) => {
+        const names = (taxon.names || []).filter((entry) => (entry.lexicon || '').toLowerCase().startsWith('scientific'));
+        listedBySynonym.set(taxon.id, names.some((entry) => listed.has(binomial(entry.name))));
+      });
+    }
+    return unmatched.filter(({ taxon }) => !listedBySynonym.get(taxon.id));
+  }
+
   // ---------- rendering ----------
 
   function renderTopSpecies(projectTaxa) {
@@ -158,8 +251,7 @@
     return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  function renderRecent(observations) {
-    fill($('bc-recent'), observations.map((observation) => {
+  function observationCard(observation, tag) {
       const taxon = observation.taxon;
       const name = taxon ? commonName(taxon) : 'Not yet identified';
       const shot = (observation.photos || [])[0];
@@ -175,9 +267,36 @@
         photo(shot && shot.url.replace('/square.', '/medium.'), name, shot && `Photo ${shot.attribution}`),
         copy
       );
+      if (tag) copy.append(el('p', 'bc-hint', tag));
       card.append(linked(inner, observation.uri || `https://www.inaturalist.org/observations/${observation.id}`));
       return card;
-    }), 'No observations yet.');
+  }
+
+  function renderRecent(observations) {
+    fill($('bc-recent'), observations.map((observation) => observationCard(observation)), 'No observations yet.');
+  }
+
+  function renderFirsts(observations) {
+    fill($('bc-firsts-inat'), observations.map((observation) => observationCard(
+      observation,
+      observation.quality_grade === 'research' ? '' : 'ID not confirmed yet'
+    )), 'None yet. Every species we’ve logged so far had already been recorded in the county.');
+  }
+
+  function renderOffList(entries) {
+    fill($('bc-firsts-flora'), entries.map(({ count, taxon }) => {
+      const row = el('li');
+      const copy = el('div');
+      copy.append(el('p', 'bc-name', commonName(taxon)), el('p', 'bc-sci', taxon.name));
+      const meta = el('p', 'bc-meta');
+      meta.append(el('strong', '', fmt(count)), ` project ${count === 1 ? 'observation' : 'observations'}`);
+      copy.append(meta);
+      const shot = taxon.default_photo || {};
+      const inner = document.createDocumentFragment();
+      inner.append(photo(shot.medium_url, commonName(taxon), shot.attribution), copy);
+      row.append(linked(inner, `https://www.inaturalist.org/observations?project_id=${PROJECT_ID}&taxon_id=${taxon.id}`));
+      return row;
+    }), 'None yet. Everything we’ve logged is already on the OregonFlora checklist.');
   }
 
   function renderBoard(id, observers, field, unit) {
@@ -314,6 +433,16 @@
         (n) => `county ${n === 1 ? 'observation' : 'observations'}`);
       $('bc-wanted-all-note').textContent = `We're still missing ${fmt(missing)} of Benton County’s ${fmt(total)} recorded plant species.`;
     }, () => showUnavailable('bc-wanted-all'));
+
+    await step(async () => {
+      if (!projectTaxa) throw new Error('Project species list unavailable');
+      renderFirsts(await countyFirsts(projectTaxa));
+    }, () => showUnavailable('bc-firsts-inat'));
+
+    await step(async () => {
+      if (!projectTaxa) throw new Error('Project species list unavailable');
+      renderOffList(await notOnOregonFlora(projectTaxa));
+    }, () => showUnavailable('bc-firsts-flora'));
 
     if (!failed) lastSuccess = new Date();
     setStatus(failed);
