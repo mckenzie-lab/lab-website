@@ -44,12 +44,3 @@ To replace a placeholder, add the portrait to `assets/images/`, update that
 person's image `src`, `alt`, `width`, and `height`, and add the new image path to
 the asset list in `.github/workflows/pages.yml` so GitHub Pages includes it.
 Profile portraits fill the large photo panel.
-
-### Biodiversity challenge page
-
-`inat-project/` loads its numbers live from iNaturalist in the visitor's browser.
-The one exception is the "Not on the OregonFlora checklist" list, which compares
-against a saved copy of OregonFlora's Benton County checklist
-(`inat-project/oregonflora-benton.json`). To pick up changes to that checklist, run
-`python3 scripts/update_oregonflora_checklist.py` from the repository root and
-commit the updated file.

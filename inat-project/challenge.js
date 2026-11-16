@@ -27,9 +27,6 @@
   // earlier county record, so a "first" really has nothing before it.
   const COUNTY_ANY_QUERY = { place_id: 484, taxon_id: 211194, verifiable: true };
   const FIRSTS_LOOKUPS = 30; // most species checked one by one per page load
-  // Saved copy of OregonFlora's Benton County checklist; refresh it with
-  // scripts/update_oregonflora_checklist.py.
-  const OREGONFLORA_LIST = 'oregonflora-benton.json?v=1';
 
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n).toLocaleString('en-US');
@@ -190,39 +187,6 @@
       .sort((a, b) => (b.observed_on || '').localeCompare(a.observed_on || ''));
   }
 
-  // "Genus species" in lower case, without hybrid signs or anything below species,
-  // so names from iNaturalist and OregonFlora can be compared.
-  const binomial = (name) => name.toLowerCase().replace(/×/g, ' x ').split(/\s+/)
-    .filter((word) => word && word !== 'x').slice(0, 2).join(' ');
-
-  let oregonFlora = null; // set of binomials on the saved checklist
-  async function oregonFloraNames() {
-    if (!oregonFlora) {
-      const response = await fetch(OREGONFLORA_LIST);
-      if (!response.ok) throw new Error(`OregonFlora checklist returned ${response.status}`);
-      oregonFlora = new Set((await response.json()).names.map(binomial));
-    }
-    return oregonFlora;
-  }
-
-  // Project species that are not on the OregonFlora checklist, under the name
-  // iNaturalist uses or any other scientific name iNaturalist knows them by
-  // (OregonFlora often files the same plant under a different name).
-  const listedBySynonym = new Map(); // taxon id -> true/false (kept while the page is open)
-  async function notOnOregonFlora(projectTaxa) {
-    const listed = await oregonFloraNames();
-    const unmatched = projectTaxa.filter(({ taxon }) => taxon.rank_level <= 10 && !listed.has(binomial(taxon.name)));
-    const unknown = unmatched.map(({ taxon }) => taxon.id).filter((id) => !listedBySynonym.has(id));
-    for (let i = 0; i < unknown.length; i += 30) {
-      const data = await api(`/taxa/${unknown.slice(i, i + 30).join(',')}`, { all_names: true });
-      data.results.forEach((taxon) => {
-        const names = (taxon.names || []).filter((entry) => (entry.lexicon || '').toLowerCase().startsWith('scientific'));
-        listedBySynonym.set(taxon.id, names.some((entry) => listed.has(binomial(entry.name))));
-      });
-    }
-    return unmatched.filter(({ taxon }) => !listedBySynonym.get(taxon.id));
-  }
-
   // ---------- rendering ----------
 
   function renderTopSpecies(projectTaxa) {
@@ -281,22 +245,6 @@
       observation,
       observation.quality_grade === 'research' ? '' : 'ID not confirmed yet'
     )), 'None yet. Every species we’ve logged so far had already been recorded in the county.');
-  }
-
-  function renderOffList(entries) {
-    fill($('bc-firsts-flora'), entries.map(({ count, taxon }) => {
-      const row = el('li');
-      const copy = el('div');
-      copy.append(el('p', 'bc-name', commonName(taxon)), el('p', 'bc-sci', taxon.name));
-      const meta = el('p', 'bc-meta');
-      meta.append(el('strong', '', fmt(count)), ` project ${count === 1 ? 'observation' : 'observations'}`);
-      copy.append(meta);
-      const shot = taxon.default_photo || {};
-      const inner = document.createDocumentFragment();
-      inner.append(photo(shot.medium_url, commonName(taxon), shot.attribution), copy);
-      row.append(linked(inner, `https://www.inaturalist.org/observations?project_id=${PROJECT_ID}&taxon_id=${taxon.id}`));
-      return row;
-    }), 'None yet. Everything we’ve logged is already on the OregonFlora checklist.');
   }
 
   function renderBoard(id, observers, field, unit) {
@@ -438,11 +386,6 @@
       if (!projectTaxa) throw new Error('Project species list unavailable');
       renderFirsts(await countyFirsts(projectTaxa));
     }, () => showUnavailable('bc-firsts-inat'));
-
-    await step(async () => {
-      if (!projectTaxa) throw new Error('Project species list unavailable');
-      renderOffList(await notOnOregonFlora(projectTaxa));
-    }, () => showUnavailable('bc-firsts-flora'));
 
     if (!failed) lastSuccess = new Date();
     setStatus(failed);
